@@ -38,3 +38,5 @@ deno task start
 ```
 
 Deno Deployではデプロイが完了し次第勝手に実行されます．たぶん．
+
+エントリポイントは`main.ts`です．
