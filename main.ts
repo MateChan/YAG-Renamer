@@ -36,7 +36,7 @@ function changeName(name: string) {
   });
 }
 
-Deno.cron("change yagileo name", CRON_SCHEDULE, () => {
+Deno.cron("change name", CRON_SCHEDULE, () => {
   if (!NAME || !MISSKEY_HOSTNAME || !MISSKEY_TOKEN) return;
   const name = randomStringFromSet(NAME);
   changeName(name);
