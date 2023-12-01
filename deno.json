@@ -1,0 +1,7 @@
+{
+  "tasks": {
+    "dev": "deno run --env --allow-env --allow-net --watch main.ts",
+    "start": "deno run --env --allow-env --allow-net main.ts"
+  },
+  "unstable": ["cron"]
+}
