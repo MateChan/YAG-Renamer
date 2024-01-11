@@ -50,3 +50,16 @@ Deno.cron("change name", CRON_SCHEDULE, () => {
   changeName(name);
   incrementCount(name);
 });
+
+Deno.serve(async () => {
+  const list = kv.list<number>({ prefix: ["name"] });
+  const names = await Array.fromAsync(list);
+  names.sort((a, b) => b.value - a.value);
+  const body = names.map((name) => {
+    return {
+      name: name.key.at(-1),
+      count: name.value,
+    };
+  });
+  return new Response(JSON.stringify(body, null, 2));
+});
