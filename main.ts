@@ -36,8 +36,21 @@ function changeName(name: string) {
   });
 }
 
+const kv = await Deno.openKv();
+
+async function incrementCount(name: string) {
+  const key = ["name", name];
+  const count = await kv.get<number>(key);
+  if (count.value) {
+    kv.set(key, count.value + 1);
+  } else {
+    kv.set(key, 1);
+  }
+}
+
 Deno.cron("change name", CRON_SCHEDULE, () => {
   if (!NAME || !MISSKEY_HOSTNAME || !MISSKEY_TOKEN) return;
   const name = randomStringFromSet(NAME);
   changeName(name);
+  incrementCount(name);
 });
