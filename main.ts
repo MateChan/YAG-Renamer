@@ -50,7 +50,7 @@ async function incrementCount(name: string) {
   const nameData = await kv.get<NameData>(key);
   const count = (nameData.value?.count ?? 0) + 1;
   const latest = datetime().toZonedTime("Asia/Tokyo").format(
-    "yyyy-MM-dd HH:mm",
+    "YYYY-MM-dd HH:mm",
   );
   kv.set(key, { count, latest });
 }
