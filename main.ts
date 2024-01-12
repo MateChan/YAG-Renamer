@@ -1,7 +1,14 @@
+import { datetime } from "https://deno.land/x/ptera@v1.0.2/mod.ts";
+
 const MISSKEY_HOSTNAME = Deno.env.get("MISSKEY_HOSTNAME");
 const MISSKEY_TOKEN = Deno.env.get("MISSKEY_TOKEN");
 const NAME = Deno.env.get("NAME");
 const CRON_SCHEDULE = Deno.env.get("CRON_SCHEDULE") ?? "0 * * * *";
+
+type NameData = {
+  count: number;
+  latest: string;
+};
 
 console.log({
   MISSKEY_HOSTNAME,
@@ -40,8 +47,12 @@ const kv = await Deno.openKv();
 
 async function incrementCount(name: string) {
   const key = ["name", name];
-  const count = await kv.get<number>(key);
-  kv.set(key, (count.value ?? 0) + 1);
+  const nameData = await kv.get<NameData>(key);
+  const count = (nameData.value?.count ?? 0) + 1;
+  const latest = datetime().toZonedTime("Asia/Tokyo").format(
+    "yyyy-MM-dd HH:mm",
+  );
+  kv.set(key, { count, latest });
 }
 
 Deno.cron("change name", CRON_SCHEDULE, () => {
@@ -52,14 +63,17 @@ Deno.cron("change name", CRON_SCHEDULE, () => {
 });
 
 Deno.serve(async () => {
-  const list = kv.list<number>({ prefix: ["name"] });
-  const names = await Array.fromAsync(list);
-  names.sort((a, b) => b.value - a.value);
-  const body = names.map((name) => {
-    return {
-      name: name.key.at(-1),
-      count: name.value,
-    };
-  });
+  const list = kv.list<NameData>({ prefix: ["name"] });
+  const nameDataEntries = await Array.fromAsync(list);
+  nameDataEntries.sort((a, b) => b.value.count - a.value.count);
+  const body = {
+    total: nameDataEntries.length,
+    names: nameDataEntries.map((nameDataEntry) => {
+      return {
+        name: nameDataEntry.key.at(-1),
+        ...nameDataEntry.value,
+      };
+    }),
+  };
   return new Response(JSON.stringify(body, null, 2));
 });
