@@ -31,6 +31,9 @@ function changeName(name: string) {
   const base = `https://${MISSKEY_HOSTNAME}`;
   const url = new URL("api/i/update", base);
   fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+    },
     method: "POST",
     body: JSON.stringify({ name, i: MISSKEY_TOKEN }),
   }).then((res) => {
